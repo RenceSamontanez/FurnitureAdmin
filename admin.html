@@ -1,0 +1,1157 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>LP Furniture — Admin Panel</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Epilogue:wght@300;400;500&display=swap" rel="stylesheet"/>
+<style>
+:root{
+  /* --- Light theme with brownish touch --- */
+  --bg: #f9f7f3;                  /* warm off-white background */
+  --surface: #f3ede7;              /* pale beige panels for cards/sections */
+  --surface2: #f7f1ea;             /* slightly brighter surface */
+  --surface3: #e5ded6;             /* accent for minor panels, hover etc. */
+
+  --gold: #b88946;                 /* warm golden oak brown */
+  --gold2: #e3b56b;                /* accent gold for highlights */
+  --gold-dim: #e3b56b22;           /* faded gold for gentle background or badge */
+
+  --text: #2d1a06;                 /* deep brown for best legibility on light bg */
+  --text2: #705e3a;                /* softer brown for subdued text */
+  --text3: #b59d7f;                /* pale light brown (muted, for labels etc) */
+
+  --green: #7bc47f;                /* fresh green, high visibility */
+  --green-dim: #7bc47f22;
+
+  --red: #c75d4a;                  /* friendly, visible error color */
+  --red-dim: #c75d4a22;
+
+  --blue: #6688b8;                 /* nice brown-friendly blue */
+  --blue-dim: #6688b822;
+
+  --amber: #e6ae61;                /* sandy-yellow for warnings */
+  --amber-dim: #e6ae6122;
+
+  --border: #ddcfbe;               /* very light brown border */
+  --border2: #eddcc6;
+
+  --radius: 10px;
+  --font-head: 'Syne',sans-serif;
+  --font-body: 'Epilogue',sans-serif;
+  --sidebar: 240px;
+}
+
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:var(--font-body);background:var(--bg);color:var(--text);display:flex;min-height:100vh;font-size:14px;}
+
+/* SIDEBAR */
+.sidebar{
+  width:var(--sidebar);flex-shrink:0;background:var(--surface);
+  border-right:1px solid var(--border);display:flex;flex-direction:column;
+  position:fixed;top:0;left:0;height:100vh;z-index:50;overflow-y:auto;
+}
+.sidebar-brand{
+  padding:24px 20px 20px;border-bottom:1px solid var(--border);
+  font-family:var(--font-head);font-size:16px;font-weight:800;color:var(--gold2);
+  letter-spacing:.5px;
+}
+.sidebar-brand span{color:var(--text2);font-weight:400;font-size:12px;display:block;margin-top:2px;}
+.sidebar-section{padding:16px 12px 6px;font-size:10px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);font-family:var(--font-head);}
+.nav-item{
+  display:flex;align-items:center;gap:10px;padding:10px 14px;
+  border-radius:8px;cursor:pointer;margin:2px 8px;
+  color:var(--text2);font-size:13px;transition:all .18s;position:relative;
+}
+.nav-item:hover{background:var(--surface3);color:var(--text);}
+.nav-item.active{background:var(--gold-dim);color:var(--gold2);}
+.nav-item .icon{font-size:16px;width:20px;text-align:center;flex-shrink:0;}
+.nav-badge{
+  margin-left:auto;background:var(--red);color:#fff;
+  font-size:10px;font-weight:700;padding:2px 7px;border-radius:20px;
+}
+.nav-badge.amber{background:var(--amber);}
+.sidebar-footer{margin-top:auto;padding:16px;border-top:1px solid var(--border);}
+.admin-chip{display:flex;align-items:center;gap:10px;}
+.admin-avatar{width:34px;height:34px;border-radius:8px;background:var(--gold);color:#1a0e00;font-weight:800;font-family:var(--font-head);font-size:14px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.admin-name{font-size:13px;font-weight:500;}
+.admin-role{font-size:11px;color:var(--text3);}
+
+/* MAIN */
+.main{margin-left:var(--sidebar);flex:1;display:flex;flex-direction:column;min-height:100vh;}
+.topbar{
+  background:var(--surface);border-bottom:1px solid var(--border);
+  padding:0 28px;height:58px;display:flex;align-items:center;justify-content:space-between;
+  position:sticky;top:0;z-index:40;
+}
+.topbar-title{font-family:var(--font-head);font-size:18px;font-weight:700;}
+.topbar-actions{display:flex;align-items:center;gap:10px;}
+.topbar-notif{position:relative;cursor:pointer;font-size:18px;padding:6px;}
+.notif-dot{position:absolute;top:4px;right:4px;width:8px;height:8px;border-radius:50%;background:var(--red);}
+.content{padding:28px;flex:1;}
+
+/* VIEWS */
+.view{display:none;animation:fadeIn .25s ease;}
+.view.active{display:block;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+
+/* CARDS */
+.stat-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:28px;}
+.stat-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);
+  padding:20px 22px;position:relative;overflow:hidden;
+}
+.stat-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;}
+.stat-card.gold::before{background:var(--gold);}
+.stat-card.green::before{background:var(--green);}
+.stat-card.blue::before{background:var(--blue);}
+.stat-card.red::before{background:var(--red);}
+.stat-icon{font-size:28px;margin-bottom:10px;}
+.stat-label{font-size:12px;color:var(--text2);margin-bottom:4px;text-transform:uppercase;letter-spacing:1px;}
+.stat-value{font-family:var(--font-head);font-size:28px;font-weight:700;color:var(--text);}
+.stat-sub{font-size:12px;color:var(--text3);margin-top:4px;}
+.stat-trend{font-size:12px;margin-top:6px;}
+.stat-trend.up{color:var(--green);}
+.stat-trend.down{color:var(--red);}
+
+/* TABLES */
+.table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;}
+.table-head{padding:18px 20px;border-bottom:1px solid var(--border);display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;}
+.table-title{font-family:var(--font-head);font-size:16px;font-weight:700;}
+.table-search{display:flex;align-items:center;gap:8px;}
+.search-input{background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:7px 14px;color:var(--text);font-family:var(--font-body);font-size:13px;outline:none;width:200px;}
+.search-input::placeholder{color:var(--text3);}
+.search-input:focus{border-color:var(--gold);}
+table{width:100%;border-collapse:collapse;}
+thead tr{background:var(--surface2);}
+th{padding:12px 16px;text-align:left;font-size:11px;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);font-family:var(--font-head);font-weight:600;}
+td{padding:13px 16px;border-bottom:1px solid var(--border);font-size:13px;vertical-align:middle;}
+tr:last-child td{border-bottom:none;}
+tr:hover td{background:var(--surface2);}
+
+/* PILLS */
+.pill{display:inline-flex;align-items:center;gap:5px;padding:4px 11px;border-radius:20px;font-size:11px;font-weight:600;}
+.pill.green{background:var(--green-dim);color:var(--green);}
+.pill.red{background:var(--red-dim);color:var(--red);}
+.pill.amber{background:var(--amber-dim);color:var(--amber);}
+.pill.blue{background:var(--blue-dim);color:var(--blue);}
+.pill.gray{background:var(--surface3);color:var(--text2);}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 18px;border-radius:8px;font-family:var(--font-body);font-size:13px;font-weight:500;cursor:pointer;border:none;transition:all .18s;}
+.btn-gold{background:var(--gold);color:#1a0e00;}
+.btn-gold:hover{background:var(--gold2);}
+.btn-outline{background:transparent;color:var(--text2);border:1px solid var(--border2);}
+.btn-outline:hover{border-color:var(--text2);color:var(--text);}
+.btn-red{background:var(--red-dim);color:var(--red);border:1px solid var(--red);}
+.btn-red:hover{background:var(--red);color:#fff;}
+.btn-green{background:var(--green-dim);color:var(--green);border:1px solid var(--green);}
+.btn-green:hover{background:var(--green);color:#fff;}
+.btn-sm{padding:5px 12px;font-size:12px;}
+.btn-icon{width:32px;height:32px;padding:0;border-radius:7px;display:inline-flex;align-items:center;justify-content:center;font-size:15px;}
+
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;opacity:0;pointer-events:none;transition:opacity .2s;}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal{background:var(--surface);border:1px solid var(--border2);border-radius:16px;max-width:580px;width:100%;max-height:88vh;overflow-y:auto;padding:32px;transform:translateY(16px);transition:transform .2s;position:relative;}
+.modal-overlay.open .modal{transform:none;}
+.modal-title{font-family:var(--font-head);font-size:22px;font-weight:700;margin-bottom:4px;}
+.modal-sub{font-size:13px;color:var(--text2);margin-bottom:24px;}
+.modal-close{position:absolute;top:16px;right:18px;background:none;border:none;color:var(--text2);font-size:20px;cursor:pointer;}
+.modal-close:hover{color:var(--text);}
+
+/* FORMS */
+.form-group{margin-bottom:18px;}
+.form-label{display:block;font-size:12px;color:var(--text2);margin-bottom:6px;letter-spacing:.5px;text-transform:uppercase;}
+.form-input,.form-select,.form-textarea{width:100%;background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:10px 14px;color:var(--text);font-family:var(--font-body);font-size:13px;outline:none;transition:border-color .18s;}
+.form-input:focus,.form-select:focus,.form-textarea:focus{border-color:var(--gold);}
+.form-input::placeholder,.form-textarea::placeholder{color:var(--text3);}
+.form-textarea{resize:vertical;min-height:80px;}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.form-select option{background:var(--surface2);}
+
+/* SECTION HEADER */
+.section-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px;}
+.section-title{font-family:var(--font-head);font-size:22px;font-weight:700;}
+.section-title span{color:var(--gold);}
+
+/* CHARTS */
+.chart-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-bottom:24px;}
+.chart-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:22px;}
+.chart-title{font-family:var(--font-head);font-size:14px;font-weight:700;margin-bottom:18px;color:var(--text2);}
+.bar-chart{display:flex;align-items:flex-end;gap:8px;height:120px;}
+.bar-wrap{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;}
+.bar{width:100%;border-radius:5px 5px 0 0;background:var(--gold);transition:height .5s ease;min-height:4px;position:relative;}
+.bar:hover{background:var(--gold2);}
+.bar-label{font-size:10px;color:var(--text3);}
+.bar-val{font-size:10px;color:var(--gold);font-weight:600;}
+.donut-wrap{display:flex;align-items:center;gap:20px;}
+.donut-legend{display:flex;flex-direction:column;gap:8px;}
+.legend-item{display:flex;align-items:center;gap:8px;font-size:12px;color:var(--text2);}
+.legend-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0;}
+
+/* INVENTORY BARS */
+.inv-item{margin-bottom:18px;}
+.inv-header{display:flex;justify-content:space-between;margin-bottom:6px;}
+.inv-name{font-size:13px;font-weight:500;}
+.inv-val{font-size:13px;color:var(--text2);}
+.inv-bar{height:8px;background:var(--surface3);border-radius:4px;overflow:hidden;}
+.inv-fill{height:100%;border-radius:4px;transition:width .6s ease;}
+.inv-fill.safe{background:var(--green);}
+.inv-fill.warn{background:var(--amber);}
+.inv-fill.danger{background:var(--red);}
+
+/* TABS */
+.tabs{display:flex;gap:2px;margin-bottom:20px;background:var(--surface2);border-radius:9px;padding:4px;}
+.tab{padding:8px 18px;border-radius:7px;font-size:13px;cursor:pointer;color:var(--text2);transition:all .18s;}
+.tab.active{background:var(--surface);color:var(--text);font-weight:500;}
+
+/* ID PREVIEW */
+.id-preview{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin:16px 0;}
+.id-card{background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:16px;text-align:center;}
+.id-card .emoji{font-size:48px;margin-bottom:8px;}
+.id-card p{font-size:12px;color:var(--text2);}
+
+/* EMPLOYEE CARD */
+.emp-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
+.emp-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;transition:border-color .18s;}
+.emp-card:hover{border-color:var(--border2);}
+.emp-avatar{width:48px;height:48px;border-radius:12px;background:var(--surface3);display:flex;align-items:center;justify-content:center;font-size:22px;margin-bottom:12px;}
+.emp-name{font-family:var(--font-head);font-size:15px;font-weight:600;margin-bottom:2px;}
+.emp-role{font-size:12px;color:var(--text2);margin-bottom:10px;}
+.emp-status{display:flex;align-items:center;gap:6px;font-size:12px;margin-bottom:14px;}
+.status-dot{width:7px;height:7px;border-radius:50%;}
+.status-dot.on{background:var(--green);}
+.status-dot.off{background:var(--text3);}
+.emp-task{background:var(--surface2);border-radius:6px;padding:8px 10px;font-size:12px;color:var(--text2);min-height:36px;}
+
+/* CHATBOT TRAINING */
+.intent-list{display:flex;flex-direction:column;gap:8px;}
+.intent-item{background:var(--surface2);border:1px solid var(--border2);border-radius:8px;padding:14px 16px;display:flex;align-items:center;justify-content:space-between;gap:12px;}
+.intent-key{font-size:13px;font-weight:500;color:var(--gold);}
+.intent-resp{font-size:12px;color:var(--text2);flex:1;margin:0 16px;}
+.intent-actions{display:flex;gap:6px;flex-shrink:0;}
+
+/* FEEDBACK */
+.feedback-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;margin-bottom:12px;}
+.feedback-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px;}
+.feedback-user{display:flex;align-items:center;gap:10px;}
+.feedback-avatar{width:32px;height:32px;border-radius:8px;background:var(--surface3);display:flex;align-items:center;justify-content:center;font-size:14px;}
+.feedback-name{font-size:13px;font-weight:500;}
+.feedback-date{font-size:11px;color:var(--text3);}
+.stars{color:var(--gold);font-size:14px;letter-spacing:1px;}
+.feedback-msg{font-size:13px;color:var(--text2);line-height:1.6;}
+
+/* REPORT */
+.report-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin-bottom:24px;}
+.report-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:20px;}
+.report-icon{font-size:28px;margin-bottom:10px;}
+.report-title{font-size:13px;color:var(--text2);margin-bottom:4px;}
+.report-val{font-family:var(--font-head);font-size:22px;font-weight:700;}
+
+/* TOAST */
+.toast{position:fixed;bottom:24px;right:24px;background:var(--surface);border:1px solid var(--border2);color:var(--text);padding:12px 20px;border-radius:10px;font-size:13px;z-index:999;transform:translateY(60px);transition:transform .3s;box-shadow:0 4px 20px rgba(0,0,0,.4);display:flex;align-items:center;gap:8px;}
+.toast.show{transform:none;}
+
+/* ALERT */
+.alert{padding:12px 16px;border-radius:8px;font-size:13px;margin-bottom:16px;display:flex;align-items:center;gap:8px;}
+.alert.amber{background:var(--amber-dim);color:var(--amber);border:1px solid var(--amber);}
+.alert.green{background:var(--green-dim);color:var(--green);border:1px solid var(--green);}
+
+/* DIVIDER */
+hr{border:none;border-top:1px solid var(--border);margin:20px 0;}
+
+/* PAYMENT RECEIPT */
+.receipt-preview{background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:20px;margin:16px 0;text-align:center;}
+.receipt-preview .emoji{font-size:56px;margin-bottom:10px;}
+.receipt-preview p{font-size:13px;color:var(--text2);}
+
+/* SCROLLBAR */
+::-webkit-scrollbar{width:6px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--surface3);border-radius:3px;}
+
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
+</style>
+</head>
+<body>
+
+<!-- SIDEBAR -->
+<aside class="sidebar">
+  <div class="sidebar-brand">LP Furniture<span>Admin Control Panel</span></div>
+
+  <div class="sidebar-section">Overview</div>
+  <div class="nav-item active" onclick="goTo('dashboard',this)"><span class="icon">📊</span> Dashboard</div>
+  <div class="nav-item" onclick="goTo('analytics',this)"><span class="icon">📈</span> Analytics</div>
+
+  <div class="sidebar-section">Operations</div>
+  <div class="nav-item" onclick="goTo('orders',this)"><span class="icon">📦</span> Orders <span class="nav-badge">5</span></div>
+  <div class="nav-item" onclick="goTo('transactions',this)"><span class="icon">💳</span> Transactions</div>
+  <div class="nav-item" onclick="goTo('payments',this)"><span class="icon">🏦</span> Payments <span class="nav-badge amber">3</span></div>
+  <div class="nav-item" onclick="goTo('installments',this)"><span class="icon">🗓️</span> Installments <span class="nav-badge amber">2</span></div>
+
+  <div class="sidebar-section">Catalog</div>
+  <div class="nav-item" onclick="goTo('products',this)"><span class="icon">🛋</span> Products</div>
+  <div class="nav-item" onclick="goTo('inventory',this)"><span class="icon">🪵</span> Inventory</div>
+
+  <div class="sidebar-section">Users</div>
+  <div class="nav-item" onclick="goTo('validation',this)"><span class="icon">🔐</span> Validation Queue <span class="nav-badge">4</span></div>
+  <div class="nav-item" onclick="goTo('customers',this)"><span class="icon">👥</span> Customers</div>
+
+  <div class="sidebar-section">Team & CX</div>
+  <div class="nav-item" onclick="goTo('employees',this)"><span class="icon">👷</span> Employees</div>
+  <div class="nav-item" onclick="goTo('chatbot',this)"><span class="icon">🤖</span> Chatbot Training</div>
+  <div class="nav-item" onclick="goTo('feedback',this)"><span class="icon">⭐</span> Feedback</div>
+
+  <div class="sidebar-section">Reports</div>
+  <div class="nav-item" onclick="goTo('reports',this)"><span class="icon">📄</span> Generate Reports</div>
+
+  <div class="sidebar-footer">
+    <div class="admin-chip">
+      <div class="admin-avatar">LP</div>
+      <div><div class="admin-name">Admin</div><div class="admin-role">Super Administrator</div></div>
+    </div>
+  </div>
+</aside>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div class="topbar-title" id="topbar-title">Dashboard</div>
+    <div class="topbar-actions">
+      <div class="topbar-notif">🔔<span class="notif-dot"></span></div>
+      <button class="btn btn-gold btn-sm" onclick="goTo('products',document.querySelector('.nav-item:nth-child(12)'));openModal('addProductModal')">+ Add Product</button>
+    </div>
+  </div>
+
+  <div class="content">
+
+  <!-- ══ DASHBOARD ══ -->
+  <div class="view active" id="view-dashboard">
+    <div class="stat-grid">
+      <div class="stat-card gold"><div class="stat-icon">💰</div><div class="stat-label">Total Revenue</div><div class="stat-value">₱284,500</div><div class="stat-sub">This month</div><div class="stat-trend up">↑ 18.4% vs last month</div></div>
+      <div class="stat-card green"><div class="stat-icon">📦</div><div class="stat-label">Active Orders</div><div class="stat-value">23</div><div class="stat-sub">12 in production</div><div class="stat-trend up">↑ 5 new today</div></div>
+      <div class="stat-card blue"><div class="stat-icon">👥</div><div class="stat-label">Verified Customers</div><div class="stat-value">148</div><div class="stat-sub">4 pending validation</div><div class="stat-trend up">↑ 12 this week</div></div>
+      <div class="stat-card red"><div class="stat-icon">⚠️</div><div class="stat-label">Low Stock Items</div><div class="stat-value">2</div><div class="stat-sub">Barnis & Nails</div><div class="stat-trend down">Reorder needed</div></div>
+    </div>
+
+    <div class="chart-grid">
+      <div class="chart-card">
+        <div class="chart-title">MONTHLY REVENUE (₱)</div>
+        <div class="bar-chart" id="revenue-chart"></div>
+        <div style="display:flex;justify-content:space-around;margin-top:6px;" id="revenue-labels"></div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">ORDERS BY CATEGORY</div>
+        <div class="donut-wrap">
+          <svg width="120" height="120" viewBox="0 0 120 120">
+            <circle cx="60" cy="60" r="50" fill="none" stroke="#252B3D" stroke-width="18"/>
+            <circle cx="60" cy="60" r="50" fill="none" stroke="#C8963E" stroke-width="18" stroke-dasharray="125 189" stroke-dashoffset="-0" transform="rotate(-90 60 60)"/>
+            <circle cx="60" cy="60" r="50" fill="none" stroke="#4A9EE0" stroke-width="18" stroke-dasharray="63 251" stroke-dashoffset="-125" transform="rotate(-90 60 60)"/>
+            <circle cx="60" cy="60" r="50" fill="none" stroke="#3CB97F" stroke-width="18" stroke-dasharray="50 264" stroke-dashoffset="-188" transform="rotate(-90 60 60)"/>
+            <circle cx="60" cy="60" r="50" fill="none" stroke="#E0A044" stroke-width="18" stroke-dasharray="76 238" stroke-dashoffset="-238" transform="rotate(-90 60 60)"/>
+            <text x="60" y="65" text-anchor="middle" fill="#F0EDE8" font-size="11" font-family="Syne">Orders</text>
+          </svg>
+          <div class="donut-legend">
+            <div class="legend-item"><div class="legend-dot" style="background:var(--gold)"></div>Tables (40%)</div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--blue)"></div>Chairs (20%)</div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>Cabinets (16%)</div>
+            <div class="legend-item"><div class="legend-dot" style="background:var(--amber)"></div>Others (24%)</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid2" style="gap:16px;">
+      <div class="table-wrap">
+        <div class="table-head"><div class="table-title">Recent Orders</div><button class="btn btn-outline btn-sm" onclick="goTo('orders',null)">View All</button></div>
+        <table>
+          <thead><tr><th>Ref</th><th>Customer</th><th>Item</th><th>Status</th><th>Total</th></tr></thead>
+          <tbody>
+            <tr><td><code style="color:var(--gold);font-size:11px;">LP-0047</code></td><td>Juan D.</td><td>Dining Table</td><td><span class="pill amber">On Process</span></td><td>₱18,500</td></tr>
+            <tr><td><code style="color:var(--gold);font-size:11px;">LP-0046</code></td><td>Maria S.</td><td>Wardrobe</td><td><span class="pill blue">Pending</span></td><td>₱22,000</td></tr>
+            <tr><td><code style="color:var(--gold);font-size:11px;">LP-0045</code></td><td>Carlo R.</td><td>King Bed</td><td><span class="pill green">Done</span></td><td>₱28,000</td></tr>
+            <tr><td><code style="color:var(--gold);font-size:11px;">LP-0044</code></td><td>Ana L.</td><td>Sofa Frame</td><td><span class="pill amber">On Process</span></td><td>₱15,500</td></tr>
+          </tbody>
+        </table>
+      </div>
+      <div class="table-wrap">
+        <div class="table-head"><div class="table-title">Pending Actions</div></div>
+        <div style="padding:12px 16px;display:flex;flex-direction:column;gap:8px;">
+          <div class="alert amber">🔐 4 user validations awaiting review</div>
+          <div class="alert amber">💳 3 GCash receipts need verification</div>
+          <div class="alert amber">🗓️ 2 installment requests pending approval</div>
+          <div class="alert green">✅ 5 orders completed this week</div>
+          <div style="margin-top:4px;display:flex;flex-direction:column;gap:6px;">
+            <button class="btn btn-outline" style="justify-content:flex-start;" onclick="goTo('validation',null)">→ Review Validations</button>
+            <button class="btn btn-outline" style="justify-content:flex-start;" onclick="goTo('payments',null)">→ Verify Payments</button>
+            <button class="btn btn-outline" style="justify-content:flex-start;" onclick="goTo('installments',null)">→ Installment Requests</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ ANALYTICS ══ -->
+  <div class="view" id="view-analytics">
+    <div class="section-header"><div class="section-title">Business <span>Analytics</span></div>
+      <select class="form-select" style="width:160px;"><option>This Month</option><option>Last 3 Months</option><option>This Year</option></select>
+    </div>
+    <div class="stat-grid">
+      <div class="stat-card gold"><div class="stat-label">Total Sales Revenue</div><div class="stat-value">₱1,284,500</div><div class="stat-trend up">↑ 23% YTD</div></div>
+      <div class="stat-card green"><div class="stat-label">Orders Completed</div><div class="stat-value">312</div><div class="stat-trend up">↑ 18% YTD</div></div>
+      <div class="stat-card blue"><div class="stat-label">Avg. Order Value</div><div class="stat-value">₱16,450</div><div class="stat-trend up">↑ 4% vs last month</div></div>
+      <div class="stat-card red"><div class="stat-label">Cancelled Orders</div><div class="stat-value">8</div><div class="stat-trend down">↓ 2 vs last month</div></div>
+    </div>
+    <div class="chart-grid">
+      <div class="chart-card" style="grid-column:1/-1;">
+        <div class="chart-title">ANNUAL REVENUE TREND (₱ thousands)</div>
+        <div class="bar-chart" id="annual-chart" style="height:160px;"></div>
+        <div style="display:flex;justify-content:space-around;margin-top:8px;" id="annual-labels"></div>
+      </div>
+    </div>
+    <div class="grid3" style="margin-top:0;">
+      <div class="chart-card">
+        <div class="chart-title">TOP PRODUCTS</div>
+        <div style="display:flex;flex-direction:column;gap:10px;">
+          <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;"><span>Dining Tables</span><span style="color:var(--gold);">₱312,000</span></div><div class="inv-bar"><div class="inv-fill safe" style="width:90%"></div></div></div>
+          <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;"><span>Cabinets</span><span style="color:var(--gold);">₱240,000</span></div><div class="inv-bar"><div class="inv-fill safe" style="width:70%"></div></div></div>
+          <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;"><span>Bed Frames</span><span style="color:var(--gold);">₱196,000</span></div><div class="inv-bar"><div class="inv-fill blue" style="width:58%;background:var(--blue)"></div></div></div>
+          <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;"><span>Chairs</span><span style="color:var(--gold);">₱138,000</span></div><div class="inv-bar"><div class="inv-fill warn" style="width:40%"></div></div></div>
+          <div><div style="display:flex;justify-content:space-between;font-size:12px;margin-bottom:4px;"><span>Doors</span><span style="color:var(--gold);">₱98,000</span></div><div class="inv-bar"><div class="inv-fill warn" style="width:28%"></div></div></div>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">PAYMENT BREAKDOWN</div>
+        <div style="display:flex;flex-direction:column;gap:14px;margin-top:8px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:13px;">Full Payment</span><div><span class="pill green">68%</span></div></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:13px;">Installment</span><div><span class="pill amber">32%</span></div></div>
+          <hr/>
+          <div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:13px;">GCash Online</span><div><span class="pill blue">71%</span></div></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:13px;">Onsite Cash</span><div><span class="pill gray">29%</span></div></div>
+          <hr/>
+          <div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:13px;">Delivery</span><div><span class="pill blue">44%</span></div></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:13px;">Pick-up</span><div><span class="pill gray">56%</span></div></div>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">FINANCIAL SUMMARY</div>
+        <div style="display:flex;flex-direction:column;gap:12px;margin-top:4px;">
+          <div style="background:var(--green-dim);border-radius:8px;padding:14px;"><div style="font-size:11px;color:var(--text2);margin-bottom:4px;">TOTAL COLLECTED</div><div style="font-family:var(--font-head);font-size:22px;color:var(--green);">₱1,128,000</div></div>
+          <div style="background:var(--amber-dim);border-radius:8px;padding:14px;"><div style="font-size:11px;color:var(--text2);margin-bottom:4px;">INSTALLMENT RECEIVABLE</div><div style="font-family:var(--font-head);font-size:22px;color:var(--amber);">₱156,500</div></div>
+          <div style="background:var(--red-dim);border-radius:8px;padding:14px;"><div style="font-size:11px;color:var(--text2);margin-bottom:4px;">MATERIAL COST (EST.)</div><div style="font-family:var(--font-head);font-size:22px;color:var(--red);">₱412,000</div></div>
+          <div style="background:var(--gold-dim);border-radius:8px;padding:14px;"><div style="font-size:11px;color:var(--text2);margin-bottom:4px;">NET PROFIT (EST.)</div><div style="font-family:var(--font-head);font-size:22px;color:var(--gold2);">₱716,000</div></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ ORDERS ══ -->
+  <div class="view" id="view-orders">
+    <div class="section-header"><div class="section-title">Order <span>Management</span></div></div>
+    <div class="tabs">
+      <div class="tab active" onclick="switchTab(this,'tab-orders')">All (23)</div>
+      <div class="tab" onclick="switchTab(this,'tab-orders')">Pending (6)</div>
+      <div class="tab" onclick="switchTab(this,'tab-orders')">On Process (12)</div>
+      <div class="tab" onclick="switchTab(this,'tab-orders')">Done (5)</div>
+    </div>
+    <div class="table-wrap">
+      <div class="table-head">
+        <div class="table-title">All Orders</div>
+        <div class="table-search"><input class="search-input" placeholder="Search order ref, customer..."/></div>
+      </div>
+      <table>
+        <thead><tr><th>Order Ref</th><th>Customer</th><th>Product</th><th>Delivery</th><th>Payment</th><th>Amount</th><th>Prod. Status</th><th>Delivery Status</th><th>Action</th></tr></thead>
+        <tbody id="orders-table-body"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ TRANSACTIONS ══ -->
+  <div class="view" id="view-transactions">
+    <div class="section-header"><div class="section-title">Transaction <span>Monitor</span></div></div>
+    <div class="table-wrap">
+      <div class="table-head">
+        <div class="table-title">All Transactions</div>
+        <div style="display:flex;gap:8px;">
+          <select class="form-select" style="width:160px;"><option>All Methods</option><option>GCash</option><option>Onsite Cash</option></select>
+          <input class="search-input" placeholder="Search ref or customer..."/>
+        </div>
+      </div>
+      <table>
+        <thead><tr><th>Ref No.</th><th>Customer</th><th>Product</th><th>Type</th><th>Method</th><th>Amount</th><th>Date</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td><code style="color:var(--gold);font-size:11px;">LP-TXN-0091</code></td><td>Juan Dela Cruz</td><td>Dining Table</td><td><span class="pill gray">Full</span></td><td>💳 GCash</td><td><strong>₱18,500</strong></td><td style="color:var(--text2);">Nov 20, 2024</td><td><span class="pill green">Confirmed</span></td></tr>
+          <tr><td><code style="color:var(--gold);font-size:11px;">LP-TXN-0090</code></td><td>Maria Santos</td><td>Wardrobe Cabinet</td><td><span class="pill amber">Installment</span></td><td>💵 Cash</td><td><strong>₱6,000</strong> <span style="color:var(--text3);font-size:11px;">/ ₱22,000</span></td><td style="color:var(--text2);">Nov 19, 2024</td><td><span class="pill amber">Partial</span></td></tr>
+          <tr><td><code style="color:var(--gold);font-size:11px;">LP-TXN-0089</code></td><td>Carlo Reyes</td><td>King Bed Frame</td><td><span class="pill gray">Full</span></td><td>💳 GCash</td><td><strong>₱28,000</strong></td><td style="color:var(--text2);">Nov 18, 2024</td><td><span class="pill green">Confirmed</span></td></tr>
+          <tr><td><code style="color:var(--gold);font-size:11px;">LP-TXN-0088</code></td><td>Ana Lopez</td><td>Sofa Frame</td><td><span class="pill gray">Full</span></td><td>💳 GCash</td><td><strong>₱15,500</strong></td><td style="color:var(--text2);">Nov 17, 2024</td><td><span class="pill blue">Pending Verification</span></td></tr>
+          <tr><td><code style="color:var(--gold);font-size:11px;">LP-TXN-0087</code></td><td>Ben Cruz</td><td>TV Console</td><td><span class="pill amber">Installment</span></td><td>💳 GCash</td><td><strong>₱3,375</strong> <span style="color:var(--text3);font-size:11px;">/ ₱13,500</span></td><td style="color:var(--text2);">Nov 16, 2024</td><td><span class="pill blue">Pending Verification</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ PAYMENTS ══ -->
+  <div class="view" id="view-payments">
+    <div class="section-header"><div class="section-title">Payment <span>Verification</span></div><span class="pill amber" style="font-size:13px;">3 Awaiting Review</span></div>
+    <div style="display:flex;flex-direction:column;gap:16px;" id="payments-list"></div>
+  </div>
+
+  <!-- ══ INSTALLMENTS ══ -->
+  <div class="view" id="view-installments">
+    <div class="section-header"><div class="section-title">Installment <span>Requests</span></div></div>
+    <div style="display:flex;flex-direction:column;gap:16px;" id="installments-list"></div>
+  </div>
+
+  <!-- ══ PRODUCTS ══ -->
+  <div class="view" id="view-products">
+    <div class="section-header">
+      <div class="section-title">Product <span>Catalog</span></div>
+      <button class="btn btn-gold" onclick="openModal('addProductModal')">+ Add Product</button>
+    </div>
+    <div class="table-wrap">
+      <div class="table-head">
+        <div class="table-title">All Products (12)</div>
+        <div class="table-search"><input class="search-input" placeholder="Search product..."/></div>
+      </div>
+      <table>
+        <thead><tr><th>Product</th><th>Category</th><th>Material</th><th>Price</th><th>Status</th><th>Actions</th></tr></thead>
+        <tbody id="products-table"></tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ INVENTORY ══ -->
+  <div class="view" id="view-inventory">
+    <div class="section-header">
+      <div class="section-title">Inventory <span>Management</span></div>
+      <button class="btn btn-outline" onclick="openModal('adjustModal')">Adjust Stock</button>
+    </div>
+    <div class="alert amber">⚠️ Barnis varnish and nails are below minimum stock levels. Consider reordering soon.</div>
+    <div class="grid2">
+      <div class="table-wrap" style="padding:22px;">
+        <div class="chart-title" style="margin-bottom:20px;">MATERIAL STOCK LEVELS</div>
+        <div class="inv-item">
+          <div class="inv-header"><span class="inv-name">🪵 Wood (Narra)</span><span class="inv-val">850 / 1200 sq ft</span></div>
+          <div class="inv-bar"><div class="inv-fill safe" style="width:71%"></div></div>
+          <div style="font-size:11px;color:var(--green);margin-top:4px;">Safe — 71%</div>
+        </div>
+        <div class="inv-item">
+          <div class="inv-header"><span class="inv-name">🪵 Wood (Mahogany)</span><span class="inv-val">420 / 1000 sq ft</span></div>
+          <div class="inv-bar"><div class="inv-fill warn" style="width:42%"></div></div>
+          <div style="font-size:11px;color:var(--amber);margin-top:4px;">Moderate — 42%</div>
+        </div>
+        <div class="inv-item">
+          <div class="inv-header"><span class="inv-name">🪵 Wood (Lawaan)</span><span class="inv-val">650 / 1000 sq ft</span></div>
+          <div class="inv-bar"><div class="inv-fill safe" style="width:65%"></div></div>
+          <div style="font-size:11px;color:var(--green);margin-top:4px;">Safe — 65%</div>
+        </div>
+        <div class="inv-item">
+          <div class="inv-header"><span class="inv-name">🧴 Barnis (Varnish)</span><span class="inv-val">8 / 50 liters</span></div>
+          <div class="inv-bar"><div class="inv-fill danger" style="width:16%"></div></div>
+          <div style="font-size:11px;color:var(--red);margin-top:4px;">CRITICAL — 16% ⚠️ Reorder Now</div>
+        </div>
+        <div class="inv-item">
+          <div class="inv-header"><span class="inv-name">🔩 Nails & Screws</span><span class="inv-val">340 / 2000 pcs</span></div>
+          <div class="inv-bar"><div class="inv-fill danger" style="width:17%"></div></div>
+          <div style="font-size:11px;color:var(--red);margin-top:4px;">CRITICAL — 17% ⚠️ Reorder Now</div>
+        </div>
+        <div class="inv-item">
+          <div class="inv-header"><span class="inv-name">🎨 Paint (White Lacquer)</span><span class="inv-val">22 / 40 liters</span></div>
+          <div class="inv-bar"><div class="inv-fill warn" style="width:55%"></div></div>
+          <div style="font-size:11px;color:var(--amber);margin-top:4px;">Moderate — 55%</div>
+        </div>
+      </div>
+      <div>
+        <div class="table-wrap" style="padding:22px;margin-bottom:16px;">
+          <div class="chart-title" style="margin-bottom:16px;">MATERIAL USAGE LOG</div>
+          <table>
+            <thead><tr><th>Date</th><th>Material</th><th>Used</th><th>Order Ref</th></tr></thead>
+            <tbody>
+              <tr><td style="color:var(--text2);">Nov 20</td><td>Wood (Narra)</td><td><span style="color:var(--red);">−45 sqft</span></td><td style="color:var(--gold);font-size:11px;">LP-0047</td></tr>
+              <tr><td style="color:var(--text2);">Nov 20</td><td>Barnis</td><td><span style="color:var(--red);">−3 L</span></td><td style="color:var(--gold);font-size:11px;">LP-0047</td></tr>
+              <tr><td style="color:var(--text2);">Nov 19</td><td>Nails & Screws</td><td><span style="color:var(--red);">−120 pcs</span></td><td style="color:var(--gold);font-size:11px;">LP-0046</td></tr>
+              <tr><td style="color:var(--text2);">Nov 18</td><td>Wood (Mahogany)</td><td><span style="color:var(--red);">−80 sqft</span></td><td style="color:var(--gold);font-size:11px;">LP-0045</td></tr>
+              <tr><td style="color:var(--text2);">Nov 18</td><td>Barnis</td><td><span style="color:var(--red);">−2 L</span></td><td style="color:var(--gold);font-size:11px;">LP-0045</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="table-wrap" style="padding:22px;">
+          <div class="chart-title" style="margin-bottom:16px;">QUICK DEDUCT STOCK</div>
+          <p style="font-size:13px;color:var(--text2);margin-bottom:16px;">Record material usage per order completion.</p>
+          <div class="form-group"><label class="form-label">Order Reference</label><input class="form-input" placeholder="LP-XXXX"/></div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Wood (sqft)</label><input class="form-input" type="number" placeholder="0"/></div>
+            <div class="form-group"><label class="form-label">Barnis (liters)</label><input class="form-input" type="number" placeholder="0"/></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Nails/Screws (pcs)</label><input class="form-input" type="number" placeholder="0"/></div>
+            <div class="form-group"><label class="form-label">Paint (liters)</label><input class="form-input" type="number" placeholder="0"/></div>
+          </div>
+          <button class="btn btn-gold" onclick="showToast('📦 Stock updated successfully')">Record Usage</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ VALIDATION ══ -->
+  <div class="view" id="view-validation">
+    <div class="section-header"><div class="section-title">Account <span>Validation Queue</span></div><span class="pill red" style="font-size:13px;">4 Pending</span></div>
+    <div style="display:flex;flex-direction:column;gap:16px;" id="validation-list"></div>
+  </div>
+
+  <!-- ══ CUSTOMERS ══ -->
+  <div class="view" id="view-customers">
+    <div class="section-header"><div class="section-title">Customer <span>Directory</span></div></div>
+    <div class="table-wrap">
+      <div class="table-head"><div class="table-title">All Customers (148)</div><input class="search-input" placeholder="Search name or email..."/></div>
+      <table>
+        <thead><tr><th>Customer</th><th>Email</th><th>Phone</th><th>Joined</th><th>Orders</th><th>Total Spent</th><th>Validation</th></tr></thead>
+        <tbody>
+          <tr><td><div style="display:flex;align-items:center;gap:8px;"><div style="width:30px;height:30px;border-radius:7px;background:var(--gold);color:#1a0e00;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;">JD</div>Juan Dela Cruz</div></td><td style="color:var(--text2);">juan@email.com</td><td style="color:var(--text2);">0917-123-4567</td><td style="color:var(--text2);">Oct 5, 2024</td><td>3</td><td style="color:var(--gold);">₱48,200</td><td><span class="pill green">Verified</span></td></tr>
+          <tr><td><div style="display:flex;align-items:center;gap:8px;"><div style="width:30px;height:30px;border-radius:7px;background:var(--blue);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;">MS</div>Maria Santos</div></td><td style="color:var(--text2);">maria@email.com</td><td style="color:var(--text2);">0918-234-5678</td><td style="color:var(--text2);">Nov 2, 2024</td><td>1</td><td style="color:var(--gold);">₱22,000</td><td><span class="pill green">Verified</span></td></tr>
+          <tr><td><div style="display:flex;align-items:center;gap:8px;"><div style="width:30px;height:30px;border-radius:7px;background:var(--green);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;">CR</div>Carlo Reyes</div></td><td style="color:var(--text2);">carlo@email.com</td><td style="color:var(--text2);">0919-345-6789</td><td style="color:var(--text2);">Sep 18, 2024</td><td>5</td><td style="color:var(--gold);">₱112,500</td><td><span class="pill green">Verified</span></td></tr>
+          <tr><td><div style="display:flex;align-items:center;gap:8px;"><div style="width:30px;height:30px;border-radius:7px;background:var(--amber);color:#1a0e00;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:12px;">BL</div>Ben Lim</div></td><td style="color:var(--text2);">ben@email.com</td><td style="color:var(--text2);">0920-456-7890</td><td style="color:var(--text2);">Nov 18, 2024</td><td>0</td><td style="color:var(--text3);">₱0</td><td><span class="pill amber">Pending</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ EMPLOYEES ══ -->
+  <div class="view" id="view-employees">
+    <div class="section-header">
+      <div class="section-title">Team <span>Management</span></div>
+      <button class="btn btn-gold" onclick="openModal('assignModal')">+ Assign Task</button>
+    </div>
+    <div class="grid2" style="margin-bottom:16px;">
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;">
+        <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:10px;">On-Call Construction Workers (7)</div>
+        <div class="emp-grid" style="grid-template-columns:repeat(2,1fr);" id="emp-grid-oncall"></div>
+      </div>
+      <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:18px;">
+        <div style="font-size:11px;letter-spacing:2px;text-transform:uppercase;color:var(--text3);margin-bottom:10px;">Day-to-Day (Barnis / Polish) (2)</div>
+        <div class="emp-grid" style="grid-template-columns:repeat(2,1fr);" id="emp-grid-daily"></div>
+      </div>
+    </div>
+    <div class="table-wrap">
+      <div class="table-head"><div class="table-title">Task Assignments</div></div>
+      <table>
+        <thead><tr><th>Employee</th><th>Task</th><th>Order Ref</th><th>Assigned</th><th>Due</th><th>Status</th></tr></thead>
+        <tbody>
+          <tr><td>Pedro M.</td><td>Build dining table frame</td><td style="color:var(--gold);">LP-0047</td><td style="color:var(--text2);">Nov 19</td><td style="color:var(--text2);">Nov 25</td><td><span class="pill amber">In Progress</span></td></tr>
+          <tr><td>Roel B.</td><td>Sand and prep wardrobe panels</td><td style="color:var(--gold);">LP-0046</td><td style="color:var(--text2);">Nov 20</td><td style="color:var(--text2);">Nov 24</td><td><span class="pill blue">Pending</span></td></tr>
+          <tr><td>Tony F. (Barnis)</td><td>Varnish & polish king bed</td><td style="color:var(--gold);">LP-0045</td><td style="color:var(--text2);">Nov 18</td><td style="color:var(--text2);">Nov 20</td><td><span class="pill green">Done</span></td></tr>
+          <tr><td>Jun G. (Barnis)</td><td>Polish sofa frame, apply lacquer</td><td style="color:var(--gold);">LP-0044</td><td style="color:var(--text2);">Nov 18</td><td style="color:var(--text2);">Nov 22</td><td><span class="pill amber">In Progress</span></td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- ══ CHATBOT ══ -->
+  <div class="view" id="view-chatbot">
+    <div class="section-header"><div class="section-title">Chatbot <span>Training</span></div><button class="btn btn-gold" onclick="openModal('addIntentModal')">+ Add Intent</button></div>
+    <div class="alert green">✅ Chatbot is active — 156 conversations this month | 94% resolution rate</div>
+    <div class="table-wrap" style="margin-bottom:16px;">
+      <div class="table-head"><div class="table-title">Rule-Based Intents</div><input class="search-input" placeholder="Search keyword..."/></div>
+      <div style="padding:16px;display:flex;flex-direction:column;gap:8px;" id="intent-list"></div>
+    </div>
+    <div class="grid2">
+      <div class="chart-card">
+        <div class="chart-title">TOP CHATBOT QUERIES</div>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:13px;">Price inquiries</span><span style="color:var(--gold);font-weight:600;">342</span></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:13px;">Browse tables</span><span style="color:var(--gold);font-weight:600;">218</span></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:13px;">Delivery info</span><span style="color:var(--gold);font-weight:600;">189</span></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:13px;">Custom furniture</span><span style="color:var(--gold);font-weight:600;">156</span></div>
+          <div style="display:flex;justify-content:space-between;align-items:center;"><span style="font-size:13px;">Payment options</span><span style="color:var(--gold);font-weight:600;">124</span></div>
+        </div>
+      </div>
+      <div class="chart-card">
+        <div class="chart-title">UNRESOLVED QUERIES (Needs Training)</div>
+        <div style="display:flex;flex-direction:column;gap:8px;margin-top:4px;">
+          <div style="background:var(--red-dim);border-radius:6px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;"><span style="font-size:13px;color:var(--text);">"Do you have glass tops?"</span><button class="btn btn-sm btn-outline" onclick="openModal('addIntentModal')">Train</button></div>
+          <div style="background:var(--red-dim);border-radius:6px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;"><span style="font-size:13px;color:var(--text);">"Can I see a sample?"</span><button class="btn btn-sm btn-outline" onclick="openModal('addIntentModal')">Train</button></div>
+          <div style="background:var(--red-dim);border-radius:6px;padding:10px 12px;display:flex;justify-content:space-between;align-items:center;"><span style="font-size:13px;color:var(--text);">"How long warranty?"</span><button class="btn btn-sm btn-outline" onclick="openModal('addIntentModal')">Train</button></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ══ FEEDBACK ══ -->
+  <div class="view" id="view-feedback">
+    <div class="section-header"><div class="section-title">Customer <span>Feedback</span></div></div>
+    <div class="stat-grid" style="grid-template-columns:repeat(4,1fr);">
+      <div class="stat-card gold"><div class="stat-label">Avg. Rating</div><div class="stat-value">4.7 ⭐</div><div class="stat-sub">From 89 reviews</div></div>
+      <div class="stat-card green"><div class="stat-label">5-Star Reviews</div><div class="stat-value">61</div><div class="stat-sub">69% of total</div></div>
+      <div class="stat-card blue"><div class="stat-label">4-Star Reviews</div><div class="stat-value">21</div><div class="stat-sub">24% of total</div></div>
+      <div class="stat-card red"><div class="stat-label">3 Stars or Less</div><div class="stat-value">7</div><div class="stat-sub">8% of total</div></div>
+    </div>
+    <div id="feedback-list"></div>
+  </div>
+
+  <!-- ══ REPORTS ══ -->
+  <div class="view" id="view-reports">
+    <div class="section-header"><div class="section-title">Generate <span>Reports</span></div></div>
+    <div class="report-grid">
+      <div class="report-card"><div class="report-icon">💰</div><div class="report-title">Sales Revenue Report</div><div class="report-val" style="color:var(--gold);">₱284,500</div><p style="font-size:12px;color:var(--text2);margin:8px 0 14px;">November 2024 — Full breakdown of income, payment types, and top items.</p><button class="btn btn-gold btn-sm" onclick="showToast('📄 Generating PDF report...')">Generate PDF</button></div>
+      <div class="report-card"><div class="report-icon">📦</div><div class="report-title">Order Summary Report</div><div class="report-val" style="color:var(--blue);">23 Orders</div><p style="font-size:12px;color:var(--text2);margin:8px 0 14px;">All orders this period — status breakdown, categories, and fulfillment rate.</p><button class="btn btn-gold btn-sm" onclick="showToast('📄 Generating PDF report...')">Generate PDF</button></div>
+      <div class="report-card"><div class="report-icon">🪵</div><div class="report-title">Inventory Usage Report</div><div class="report-val" style="color:var(--amber);">3 Materials</div><p style="font-size:12px;color:var(--text2);margin:8px 0 14px;">Material consumption per order — wood, barnis, and nails usage log.</p><button class="btn btn-gold btn-sm" onclick="showToast('📄 Generating PDF report...')">Generate PDF</button></div>
+      <div class="report-card"><div class="report-icon">👥</div><div class="report-title">Customer Report</div><div class="report-val" style="color:var(--green);">148 Users</div><p style="font-size:12px;color:var(--text2);margin:8px 0 14px;">Verified vs pending, top spenders, and new registrations this period.</p><button class="btn btn-gold btn-sm" onclick="showToast('📄 Generating PDF report...')">Generate PDF</button></div>
+      <div class="report-card"><div class="report-icon">👷</div><div class="report-title">Employee Task Report</div><div class="report-val" style="color:var(--text);">9 Workers</div><p style="font-size:12px;color:var(--text2);margin:8px 0 14px;">Task assignments, completion rates, and worker utilization this period.</p><button class="btn btn-gold btn-sm" onclick="showToast('📄 Generating PDF report...')">Generate PDF</button></div>
+      <div class="report-card"><div class="report-icon">💳</div><div class="report-title">Installment Ledger</div><div class="report-val" style="color:var(--amber);">₱156,500</div><p style="font-size:12px;color:var(--text2);margin:8px 0 14px;">All installment balances, due dates, and collection status.</p><button class="btn btn-gold btn-sm" onclick="showToast('📄 Generating PDF report...')">Generate PDF</button></div>
+    </div>
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:24px;">
+      <div class="section-title" style="font-size:16px;margin-bottom:18px;">Custom Report Builder</div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Report Type</label><select class="form-select"><option>Sales & Revenue</option><option>Orders</option><option>Inventory</option><option>Customers</option><option>Employees</option></select></div>
+        <div class="form-group"><label class="form-label">Format</label><select class="form-select"><option>PDF</option><option>Excel / CSV</option></select></div>
+      </div>
+      <div class="form-row">
+        <div class="form-group"><label class="form-label">Date From</label><input class="form-input" type="date"/></div>
+        <div class="form-group"><label class="form-label">Date To</label><input class="form-input" type="date"/></div>
+      </div>
+      <button class="btn btn-gold" onclick="showToast('📄 Custom report generated!')">Generate Custom Report</button>
+    </div>
+  </div>
+
+  </div><!-- end content -->
+</div><!-- end main -->
+
+<!-- ══ MODALS ══ -->
+
+<!-- ADD PRODUCT -->
+<div class="modal-overlay" id="addProductModal" onclick="closeOut(event,'addProductModal')">
+  <div class="modal"><button class="modal-close" onclick="closeModal('addProductModal')">✕</button>
+    <div class="modal-title">Add New Product</div>
+    <div class="modal-sub">New furniture item will appear in the customer catalog immediately.</div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Product Name</label><input class="form-input" placeholder="e.g. Narra Dining Table"/></div>
+      <div class="form-group"><label class="form-label">Category</label><select class="form-select"><option>Table</option><option>Chair</option><option>Cabinet</option><option>Bed</option><option>Door</option><option>Sofa</option><option>Other</option></select></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Starting Price (₱)</label><input class="form-input" type="number" placeholder="0"/></div>
+      <div class="form-group"><label class="form-label">Primary Material</label><input class="form-input" placeholder="e.g. Narra wood"/></div>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Finish/Treatment</label><input class="form-input" placeholder="e.g. Teak oil, lacquer"/></div>
+      <div class="form-group"><label class="form-label">Dimensions</label><input class="form-input" placeholder="e.g. 180×80×75 cm"/></div>
+    </div>
+    <div class="form-group"><label class="form-label">Description</label><textarea class="form-textarea" placeholder="Describe the product, features, customization options..."></textarea></div>
+    <div class="form-group"><label class="form-label">Product Photo</label><div style="border:2px dashed var(--border2);border-radius:8px;padding:24px;text-align:center;cursor:pointer;color:var(--text2);font-size:13px;">📷 Click to upload product image</div></div>
+    <div style="display:flex;gap:10px;margin-top:8px;">
+      <button class="btn btn-outline" style="flex:1;" onclick="closeModal('addProductModal')">Cancel</button>
+      <button class="btn btn-gold" style="flex:1;" onclick="closeModal('addProductModal');showToast('✅ Product added to catalog!')">Save Product</button>
+    </div>
+  </div>
+</div>
+
+<!-- UPDATE ORDER STATUS -->
+<div class="modal-overlay" id="orderModal" onclick="closeOut(event,'orderModal')">
+  <div class="modal"><button class="modal-close" onclick="closeModal('orderModal')">✕</button>
+    <div class="modal-title">Update Order Status</div>
+    <div class="modal-sub" id="order-modal-ref">Order: LP-0047</div>
+    <div class="form-group"><label class="form-label">Production Status</label>
+      <select class="form-select"><option>Pending</option><option selected>On Process</option><option>Done</option></select>
+    </div>
+    <div class="form-group"><label class="form-label">Delivery Status</label>
+      <select class="form-select"><option>Waiting for Courier</option><option>On Progress</option><option>Shipped / Delivered</option></select>
+    </div>
+    <div class="form-group"><label class="form-label">Note to Customer (optional)</label><textarea class="form-textarea" placeholder="e.g. 'Your table is being assembled by our team. Expected completion Nov 25.'"></textarea></div>
+    <button class="btn btn-gold" style="width:100%;" onclick="closeModal('orderModal');showToast('✅ Order status updated & customer notified!')">Update & Notify Customer</button>
+  </div>
+</div>
+
+<!-- VALIDATE USER -->
+<div class="modal-overlay" id="valModal" onclick="closeOut(event,'valModal')">
+  <div class="modal"><button class="modal-close" onclick="closeModal('valModal')">✕</button>
+    <div class="modal-title">Review Validation</div>
+    <div class="modal-sub" id="val-modal-name">Customer: Ben Lim</div>
+    <div class="id-preview">
+      <div class="id-card"><div class="emoji">🪪</div><strong style="font-size:13px;">Government ID</strong><p>PhilSys / Driver's License</p><div style="margin-top:8px;"><span class="pill amber">Submitted Nov 18</span></div></div>
+      <div class="id-card"><div class="emoji">🤳</div><strong style="font-size:13px;">Selfie with ID</strong><p>Photo holding the ID</p><div style="margin-top:8px;"><span class="pill amber">Submitted Nov 18</span></div></div>
+    </div>
+    <div style="background:var(--surface2);border-radius:8px;padding:14px;margin-bottom:16px;">
+      <div style="font-size:12px;color:var(--text2);margin-bottom:8px;">CUSTOMER DETAILS</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;font-size:13px;">
+        <div><span style="color:var(--text2);">Name:</span> Ben Lim</div>
+        <div><span style="color:var(--text2);">Email:</span> ben@email.com</div>
+        <div><span style="color:var(--text2);">Phone:</span> 0920-456-7890</div>
+        <div><span style="color:var(--text2);">Joined:</span> Nov 18, 2024</div>
+      </div>
+    </div>
+    <div class="form-group"><label class="form-label">Rejection Reason (if rejecting)</label><textarea class="form-textarea" placeholder="e.g. ID photo is blurry. Please resubmit a clearer photo of your ID."></textarea></div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-red" style="flex:1;" onclick="closeModal('valModal');showToast('❌ Validation rejected — customer notified')">Reject</button>
+      <button class="btn btn-green" style="flex:1;" onclick="closeModal('valModal');showToast('✅ Account validated — customer can now order!')">Approve</button>
+    </div>
+  </div>
+</div>
+
+<!-- PAYMENT VERIFY -->
+<div class="modal-overlay" id="payModal" onclick="closeOut(event,'payModal')">
+  <div class="modal"><button class="modal-close" onclick="closeModal('payModal')">✕</button>
+    <div class="modal-title">Verify Payment</div>
+    <div class="modal-sub" id="pay-modal-ref">Receipt for LP-TXN-0088</div>
+    <div class="receipt-preview"><div class="emoji">📱</div><strong>GCash Receipt Screenshot</strong><p style="margin-top:6px;">Uploaded by customer — Nov 17, 2024</p></div>
+    <div style="background:var(--surface2);border-radius:8px;padding:14px;margin-bottom:16px;">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;font-size:13px;">
+        <div><span style="color:var(--text2);">Customer:</span> Ana Lopez</div>
+        <div><span style="color:var(--text2);">Amount:</span> <strong style="color:var(--gold);">₱15,500</strong></div>
+        <div><span style="color:var(--text2);">Order:</span> Sofa Frame</div>
+        <div><span style="color:var(--text2);">Method:</span> GCash QR</div>
+        <div><span style="color:var(--text2);">QR Hash:</span> <code style="color:var(--green);font-size:11px;">LP-2024-B2E9A1</code></div>
+        <div><span style="color:var(--text2);">QR Status:</span> <span class="pill green">Verified</span></div>
+      </div>
+    </div>
+    <div class="form-group"><label class="form-label">Admin Note (optional)</label><textarea class="form-textarea" placeholder="Optional notes about this payment..."></textarea></div>
+    <div style="display:flex;gap:10px;">
+      <button class="btn btn-red" style="flex:1;" onclick="closeModal('payModal');showToast('❌ Payment rejected — customer notified')">Reject</button>
+      <button class="btn btn-green" style="flex:1;" onclick="closeModal('payModal');showToast('✅ Payment confirmed! Order is now active.')">Confirm Payment</button>
+    </div>
+  </div>
+</div>
+
+<!-- ASSIGN TASK -->
+<div class="modal-overlay" id="assignModal" onclick="closeOut(event,'assignModal')">
+  <div class="modal"><button class="modal-close" onclick="closeModal('assignModal')">✕</button>
+    <div class="modal-title">Assign Task</div>
+    <div class="modal-sub">Assign a work task to an employee for a specific order.</div>
+    <div class="form-group"><label class="form-label">Employee</label>
+      <select class="form-select"><option>Pedro Mendoza (Construction)</option><option>Roel Bautista (Construction)</option><option>Noel Cruz (Construction)</option><option>Ding Flores (Construction)</option><option>Boyet Santos (Construction)</option><option>Kuya Rey (Construction)</option><option>Mang Bert (Construction)</option><option>Tony Fabian (Barnis/Polish)</option><option>Jun Garcia (Barnis/Polish)</option></select>
+    </div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Order Reference</label><input class="form-input" placeholder="LP-XXXX"/></div>
+      <div class="form-group"><label class="form-label">Due Date</label><input class="form-input" type="date"/></div>
+    </div>
+    <div class="form-group"><label class="form-label">Task Description</label><textarea class="form-textarea" placeholder="e.g. Build and assemble the dining table frame. Sand all surfaces. Do not apply varnish yet."></textarea></div>
+    <div class="form-group"><label class="form-label">Priority</label><select class="form-select"><option>Normal</option><option>High</option><option>Urgent</option></select></div>
+    <button class="btn btn-gold" style="width:100%;" onclick="closeModal('assignModal');showToast('✅ Task assigned successfully!')">Assign Task</button>
+  </div>
+</div>
+
+<!-- ADD INTENT -->
+<div class="modal-overlay" id="addIntentModal" onclick="closeOut(event,'addIntentModal')">
+  <div class="modal"><button class="modal-close" onclick="closeModal('addIntentModal')">✕</button>
+    <div class="modal-title">Add Chatbot Intent</div>
+    <div class="modal-sub">Teach the chatbot how to respond to a new keyword or question.</div>
+    <div class="form-group"><label class="form-label">Trigger Keywords (comma-separated)</label><input class="form-input" placeholder="e.g. glass, glass top, tempered glass"/></div>
+    <div class="form-group"><label class="form-label">Chatbot Response</label><textarea class="form-textarea" style="min-height:120px;" placeholder="e.g. We specialize in solid wood furniture. We do not currently offer glass-top tables, but we can combine wood with glass if requested. Please contact us for a custom quote!"></textarea></div>
+    <div class="form-group"><label class="form-label">Suggested Replies (comma-separated)</label><input class="form-input" placeholder="e.g. Request custom quote, Browse catalog, Contact us"/></div>
+    <div class="form-group"><label class="form-label">Category</label><select class="form-select"><option>Product Info</option><option>Pricing</option><option>Delivery</option><option>Custom Orders</option><option>Materials</option><option>General</option></select></div>
+    <button class="btn btn-gold" style="width:100%;" onclick="closeModal('addIntentModal');showToast('🤖 Chatbot trained with new intent!')">Save Intent</button>
+  </div>
+</div>
+
+<!-- ADJUST STOCK -->
+<div class="modal-overlay" id="adjustModal" onclick="closeOut(event,'adjustModal')">
+  <div class="modal"><button class="modal-close" onclick="closeModal('adjustModal')">✕</button>
+    <div class="modal-title">Adjust Inventory Stock</div>
+    <div class="modal-sub">Add new stock after procurement or correct stock levels.</div>
+    <div class="form-group"><label class="form-label">Material</label><select class="form-select"><option>Wood - Narra (sq ft)</option><option>Wood - Mahogany (sq ft)</option><option>Wood - Lawaan (sq ft)</option><option>Barnis / Varnish (liters)</option><option>Nails & Screws (pieces)</option><option>Paint / Lacquer (liters)</option></select></div>
+    <div class="form-row">
+      <div class="form-group"><label class="form-label">Action</label><select class="form-select"><option>Add Stock (+)</option><option>Deduct Stock (−)</option><option>Set Exact Value</option></select></div>
+      <div class="form-group"><label class="form-label">Quantity</label><input class="form-input" type="number" placeholder="0"/></div>
+    </div>
+    <div class="form-group"><label class="form-label">Reason / Notes</label><input class="form-input" placeholder="e.g. New delivery from supplier, Order completion, etc."/></div>
+    <button class="btn btn-gold" style="width:100%;" onclick="closeModal('adjustModal');showToast('📦 Inventory updated successfully!')">Update Stock</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+// ── NAVIGATION ──
+function goTo(view, el) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.getElementById('view-' + view).classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  if (el) el.classList.add('active');
+  const titles = {dashboard:'Dashboard',analytics:'Analytics',orders:'Orders',transactions:'Transactions',payments:'Payment Verification',installments:'Installment Requests',products:'Products',inventory:'Inventory',validation:'Validation Queue',customers:'Customers',employees:'Employees',chatbot:'Chatbot Training',feedback:'Feedback',reports:'Reports'};
+  document.getElementById('topbar-title').textContent = titles[view] || view;
+  window.scrollTo(0,0);
+}
+
+// ── MODALS ──
+function openModal(id){document.getElementById(id).classList.add('open');}
+function closeModal(id){document.getElementById(id).classList.remove('open');}
+function closeOut(e,id){if(e.target.id===id)closeModal(id);}
+
+// ── TOAST ──
+function showToast(msg){const t=document.getElementById('toast');t.textContent=msg;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),3000);}
+
+// ── TABS ──
+function switchTab(el,group){el.parentElement.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');}
+
+// ── CHARTS ──
+function renderRevenueChart(){
+  const data=[{l:'Jun',v:42},{l:'Jul',v:58},{l:'Aug',v:51},{l:'Sep',v:74},{l:'Oct',v:89},{l:'Nov',v:112}];
+  const max=Math.max(...data.map(d=>d.v));
+  const chart=document.getElementById('revenue-chart');
+  const labels=document.getElementById('revenue-labels');
+  if(!chart)return;
+  chart.innerHTML=data.map(d=>`
+    <div class="bar-wrap">
+      <div class="bar-val">₱${d.v}k</div>
+      <div class="bar" style="height:${(d.v/max)*110}px;"></div>
+    </div>`).join('');
+  labels.innerHTML=data.map(d=>`<div class="bar-label" style="flex:1;text-align:center;">${d.l}</div>`).join('');
+}
+
+function renderAnnualChart(){
+  const data=[{l:'Jan',v:65},{l:'Feb',v:72},{l:'Mar',v:58},{l:'Apr',v:90},{l:'May',v:85},{l:'Jun',v:42},{l:'Jul',v:58},{l:'Aug',v:51},{l:'Sep',v:74},{l:'Oct',v:89},{l:'Nov',v:112},{l:'Dec',v:0}];
+  const max=Math.max(...data.map(d=>d.v));
+  const chart=document.getElementById('annual-chart');
+  const labels=document.getElementById('annual-labels');
+  if(!chart)return;
+  chart.innerHTML=data.map(d=>`
+    <div class="bar-wrap">
+      <div class="bar-val" style="font-size:9px;">${d.v?'₱'+d.v+'k':'-'}</div>
+      <div class="bar" style="height:${d.v?(d.v/max)*150:4}px;${d.v===0?'background:var(--surface3);':''}"></div>
+    </div>`).join('');
+  labels.innerHTML=data.map(d=>`<div class="bar-label" style="flex:1;text-align:center;">${d.l}</div>`).join('');
+}
+
+// ── ORDERS TABLE ──
+const orders=[
+  {ref:'LP-0047',cust:'Juan D.',item:'🪵 Dining Table',delivery:'ship',pay:'Full',amount:'₱18,500',prod:1,del:0},
+  {ref:'LP-0046',cust:'Maria S.',item:'🚿 Wardrobe',delivery:'pickup',pay:'Installment',amount:'₱22,000',prod:0,del:0},
+  {ref:'LP-0045',cust:'Carlo R.',item:'🛏 King Bed',delivery:'ship',pay:'Full',amount:'₱28,000',prod:2,del:2},
+  {ref:'LP-0044',cust:'Ana L.',item:'🛋 Sofa Frame',delivery:'pickup',pay:'Full',amount:'₱15,500',prod:1,del:0},
+  {ref:'LP-0043',cust:'Ben C.',item:'📺 TV Console',delivery:'pickup',pay:'Installment',amount:'₱13,500',prod:2,del:1},
+];
+const prodPills=['<span class="pill blue">Pending</span>','<span class="pill amber">On Process</span>','<span class="pill green">Done</span>'];
+const delPills=['<span class="pill gray">—</span>','<span class="pill blue">Waiting Courier</span>','<span class="pill amber">On Progress</span>','<span class="pill green">Shipped</span>'];
+function renderOrders(){
+  const tb=document.getElementById('orders-table-body');
+  if(!tb)return;
+  tb.innerHTML=orders.map(o=>`<tr>
+    <td><code style="color:var(--gold);font-size:11px;">${o.ref}</code></td>
+    <td>${o.cust}</td><td>${o.item}</td>
+    <td>${o.delivery==='ship'?'🚚 Deliver':'🏪 Pick-up'}</td>
+    <td><span class="pill ${o.pay==='Full'?'gray':'amber'}">${o.pay}</span></td>
+    <td><strong>${o.amount}</strong></td>
+    <td>${prodPills[o.prod]}</td>
+    <td>${delPills[o.del]}</td>
+    <td><button class="btn btn-sm btn-outline" onclick="document.getElementById('order-modal-ref').textContent='Order: ${o.ref}';openModal('orderModal')">Update</button></td>
+  </tr>`).join('');
+}
+
+// ── PRODUCTS TABLE ──
+const products=[
+  {name:'🪵 Narra Dining Table',cat:'Table',mat:'Narra',price:'₱18,500',status:'active'},
+  {name:'🪑 Executive Chair',cat:'Chair',mat:'Mahogany',price:'₱7,200',status:'active'},
+  {name:'🚪 Wooden Panel Door',cat:'Door',mat:'Gemelina',price:'₱9,800',status:'active'},
+  {name:'🚿 4-Door Wardrobe',cat:'Cabinet',mat:'Lawaan',price:'₱22,000',status:'active'},
+  {name:'🛏 King Bed Frame',cat:'Bed',mat:'Narra',price:'₱28,000',status:'active'},
+  {name:'🛋 3-Seater Sofa Frame',cat:'Sofa',mat:'Acacia',price:'₱15,500',status:'hidden'},
+  {name:'📚 Study Table',cat:'Table',mat:'Lawaan',price:'₱11,000',status:'active'},
+  {name:'🎄 Rocking Chair',cat:'Chair',mat:'Bamboo',price:'₱5,500',status:'active'},
+];
+function renderProducts(){
+  const tb=document.getElementById('products-table');
+  if(!tb)return;
+  tb.innerHTML=products.map((p,i)=>`<tr>
+    <td><strong>${p.name}</strong></td>
+    <td><span class="pill gray">${p.cat}</span></td>
+    <td style="color:var(--text2);">${p.mat}</td>
+    <td><strong style="color:var(--gold);">${p.price}</strong></td>
+    <td><span class="pill ${p.status==='active'?'green':'gray'}">${p.status==='active'?'Active':'Hidden'}</span></td>
+    <td><div style="display:flex;gap:6px;">
+      <button class="btn btn-sm btn-outline" onclick="showToast('✏️ Editing ${p.name}')">Edit</button>
+      <button class="btn btn-sm btn-red" onclick="showToast('🗑 Product removed from catalog')">Remove</button>
+    </div></td>
+  </tr>`).join('');
+}
+
+// ── VALIDATION LIST ──
+const valQueue=[
+  {name:'Ben Lim',email:'ben@email.com',phone:'0920-456-7890',date:'Nov 18'},
+  {name:'Rosa P.',email:'rosa@email.com',phone:'0912-567-8901',date:'Nov 19'},
+  {name:'Marco T.',email:'marco@email.com',phone:'0913-678-9012',date:'Nov 20'},
+  {name:'Lyn A.',email:'lyn@email.com',phone:'0914-789-0123',date:'Nov 20'},
+];
+function renderValidation(){
+  const el=document.getElementById('validation-list');
+  if(!el)return;
+  el.innerHTML=valQueue.map(v=>`
+    <div class="table-wrap" style="padding:20px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+        <div style="display:flex;align-items:center;gap:14px;">
+          <div style="width:46px;height:46px;border-radius:12px;background:var(--surface3);display:flex;align-items:center;justify-content:center;font-size:20px;">👤</div>
+          <div>
+            <div style="font-size:15px;font-weight:600;">${v.name}</div>
+            <div style="font-size:12px;color:var(--text2);">${v.email} · ${v.phone}</div>
+            <div style="font-size:11px;color:var(--text3);">Submitted: ${v.date}, 2024</div>
+          </div>
+        </div>
+        <div style="display:flex;gap:8px;align-items:center;">
+          <div style="background:var(--surface2);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--text2);">🪪 ID Photo: <strong>Submitted</strong></div>
+          <div style="background:var(--surface2);border-radius:8px;padding:10px 14px;font-size:12px;color:var(--text2);">🤳 Selfie: <strong>Submitted</strong></div>
+          <button class="btn btn-sm btn-outline" onclick="document.getElementById('val-modal-name').textContent='Customer: ${v.name}';openModal('valModal')">Review</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+// ── PAYMENTS LIST ──
+const pendingPay=[
+  {ref:'LP-TXN-0088',cust:'Ana Lopez',item:'Sofa Frame',amount:'₱15,500',method:'GCash',date:'Nov 17'},
+  {ref:'LP-TXN-0087',cust:'Ben Cruz',item:'TV Console',amount:'₱3,375',method:'GCash',date:'Nov 16'},
+  {ref:'LP-TXN-0086',cust:'Rosa Perez',item:'Study Table',amount:'₱11,000',method:'GCash',date:'Nov 15'},
+];
+function renderPayments(){
+  const el=document.getElementById('payments-list');
+  if(!el)return;
+  el.innerHTML=pendingPay.map(p=>`
+    <div class="table-wrap" style="padding:20px;">
+      <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;">
+        <div>
+          <code style="color:var(--gold);font-size:12px;">${p.ref}</code>
+          <div style="font-size:15px;font-weight:600;margin-top:4px;">${p.cust} — ${p.item}</div>
+          <div style="font-size:12px;color:var(--text2);">${p.method} · Submitted ${p.date}, 2024</div>
+        </div>
+        <div style="display:flex;align-items:center;gap:12px;">
+          <div style="font-family:var(--font-head);font-size:22px;color:var(--gold);">${p.amount}</div>
+          <div style="background:var(--surface2);border-radius:8px;padding:10px 14px;text-align:center;font-size:12px;cursor:pointer;color:var(--text2);">📱 View Receipt</div>
+          <button class="btn btn-sm btn-outline" onclick="document.getElementById('pay-modal-ref').textContent='Receipt for ${p.ref}';openModal('payModal')">Verify Payment</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+// ── INSTALLMENTS LIST ──
+const instReqs=[
+  {ref:'LP-ORD-0046',cust:'Maria Santos',item:'Wardrobe Cabinet',total:'₱22,000',period:'6 months',monthly:'₱3,667',down:'₱6,000',date:'Nov 19'},
+  {ref:'LP-ORD-0043',cust:'Ben Cruz',item:'TV Console',total:'₱13,500',period:'4 months',monthly:'₱3,375',down:'₱3,375',date:'Nov 16'},
+];
+function renderInstallments(){
+  const el=document.getElementById('installments-list');
+  if(!el)return;
+  el.innerHTML=instReqs.map(r=>`
+    <div class="table-wrap" style="padding:22px;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:16px;">
+        <div>
+          <code style="color:var(--gold);font-size:12px;">${r.ref}</code>
+          <div style="font-size:16px;font-weight:600;margin:4px 0;">${r.cust} — ${r.item}</div>
+          <div style="font-size:12px;color:var(--text2);">Requested: ${r.date}, 2024</div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:16px;text-align:center;">
+          <div style="background:var(--surface2);border-radius:8px;padding:12px 16px;"><div style="font-size:11px;color:var(--text2);">TOTAL</div><div style="font-family:var(--font-head);font-size:18px;color:var(--gold);">${r.total}</div></div>
+          <div style="background:var(--surface2);border-radius:8px;padding:12px 16px;"><div style="font-size:11px;color:var(--text2);">PERIOD</div><div style="font-family:var(--font-head);font-size:18px;">${r.period}</div></div>
+          <div style="background:var(--surface2);border-radius:8px;padding:12px 16px;"><div style="font-size:11px;color:var(--text2);">MONTHLY</div><div style="font-family:var(--font-head);font-size:18px;color:var(--green);">${r.monthly}</div></div>
+        </div>
+        <div style="display:flex;gap:8px;align-self:flex-end;">
+          <button class="btn btn-red btn-sm" onclick="showToast('❌ Installment request rejected')">Reject</button>
+          <button class="btn btn-green btn-sm" onclick="showToast('✅ Installment approved! Customer notified.')">Approve</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+// ── EMPLOYEES ──
+const employees=[
+  {name:'Pedro Mendoza',role:'Construction',emoji:'🔨',status:'busy',task:'Building dining table LP-0047'},
+  {name:'Roel Bautista',role:'Construction',emoji:'🪚',status:'busy',task:'Sanding wardrobe panels LP-0046'},
+  {name:'Noel Cruz',role:'Construction',emoji:'🔧',status:'available',task:'No current task'},
+  {name:'Ding Flores',role:'Construction',emoji:'🪛',status:'available',task:'No current task'},
+  {name:'Boyet Santos',role:'Construction',emoji:'⚒️',status:'busy',task:'Cutting bed frame LP-0048'},
+  {name:'Kuya Rey',role:'Construction',emoji:'🔨',status:'oncall',task:'On-call (not yet deployed)'},
+  {name:'Mang Bert',role:'Construction',emoji:'🪚',status:'oncall',task:'On-call (not yet deployed)'},
+];
+const daily=[
+  {name:'Tony Fabian',role:'Barnis / Polish',emoji:'🧴',status:'busy',task:'Varnishing sofa frame LP-0044'},
+  {name:'Jun Garcia',role:'Barnis / Polish',emoji:'🖌️',status:'available',task:'No current task'},
+];
+function renderEmployees(){
+  const og=document.getElementById('emp-grid-oncall');
+  const dg=document.getElementById('emp-grid-daily');
+  if(!og)return;
+  og.innerHTML=employees.map(e=>`
+    <div class="emp-card">
+      <div class="emp-avatar">${e.emoji}</div>
+      <div class="emp-name">${e.name}</div>
+      <div class="emp-role">${e.role}</div>
+      <div class="emp-status">
+        <div class="status-dot ${e.status==='available'?'on':e.status==='busy'?'on':'off'}"></div>
+        <span style="color:${e.status==='available'?'var(--green)':e.status==='busy'?'var(--amber)':'var(--text3)'};">${e.status==='available'?'Available':e.status==='busy'?'Assigned':'On-Call'}</span>
+      </div>
+      <div class="emp-task">${e.task}</div>
+      <button class="btn btn-sm btn-outline" style="margin-top:8px;width:100%;" onclick="openModal('assignModal')">Assign Task</button>
+    </div>`).join('');
+  dg.innerHTML=daily.map(e=>`
+    <div class="emp-card">
+      <div class="emp-avatar">${e.emoji}</div>
+      <div class="emp-name">${e.name}</div>
+      <div class="emp-role">${e.role}</div>
+      <div class="emp-status">
+        <div class="status-dot ${e.status==='available'?'on':'on'}"></div>
+        <span style="color:${e.status==='available'?'var(--green)':'var(--amber)'};">${e.status==='available'?'Available':'Assigned'}</span>
+      </div>
+      <div class="emp-task">${e.task}</div>
+      <button class="btn btn-sm btn-outline" style="margin-top:8px;width:100%;" onclick="openModal('assignModal')">Assign Task</button>
+    </div>`).join('');
+}
+
+// ── CHATBOT INTENTS ──
+const intents=[
+  {key:'chair, chairs, seat',resp:'We make dining chairs, office chairs, rocking chairs, and more — all from solid wood!',cat:'Product'},
+  {key:'table, dining, desk',resp:'We build dining tables, coffee tables, study desks. Available in custom sizes!',cat:'Product'},
+  {key:'price, cost, how much, budget',resp:"What's your budget? I'll filter the best options for you.",cat:'Pricing'},
+  {key:'delivery, shipping, ship',resp:'We offer pick-up (free) or door-to-door delivery (₱500 base). Notification sent when ready.',cat:'Delivery'},
+  {key:'custom, customize, design',resp:"We love custom orders! Tell us your dimensions, style, and wood preference. We can build it!",cat:'Custom'},
+  {key:'wood, material, narra, mahogany',resp:'We use Narra, Mahogany, Lawaan, Acacia, and Gemelina — all premium Philippine hardwoods.',cat:'Materials'},
+  {key:'installment, monthly, payment plan',resp:'Yes! We offer 7-day, 15-day, 30-day, or up to 6-month installment plans. Subject to admin approval.',cat:'Pricing'},
+];
+function renderIntents(){
+  const el=document.getElementById('intent-list');
+  if(!el)return;
+  el.innerHTML=intents.map(i=>`
+    <div class="intent-item">
+      <code class="intent-key">${i.key}</code>
+      <div class="intent-resp">${i.resp.substring(0,80)}...</div>
+      <span class="pill gray" style="font-size:10px;">${i.cat}</span>
+      <div class="intent-actions">
+        <button class="btn btn-sm btn-outline" onclick="showToast('✏️ Editing intent...')">Edit</button>
+        <button class="btn btn-sm btn-red btn-icon" onclick="showToast('🗑 Intent deleted')">✕</button>
+      </div>
+    </div>`).join('');
+}
+
+// ── FEEDBACK ──
+const feedbacks=[
+  {name:'Juan D.',emoji:'👤',stars:5,date:'Nov 18',msg:'Sobrang ganda ng dining table! Solid and maayos ang pagkakagawa. Will definitely order again for our new house.',order:'Narra Dining Table'},
+  {name:'Maria S.',emoji:'👤',stars:5,date:'Nov 15',msg:"Mas maganda pa sa picture! The wardrobe arrived on time and the craftsmanship is excellent. Our family loves it.",order:'Wardrobe Cabinet'},
+  {name:'Carlo R.',emoji:'👤',stars:4,date:'Nov 10',msg:'Great quality bed frame. Delivery took a bit longer than expected but the result is worth it.',order:'King Bed Frame'},
+  {name:'Ana L.',emoji:'👤',stars:3,date:'Nov 5',msg:'Good product but communication was slow. Would appreciate faster updates on order status.',order:'Sofa Frame'},
+];
+function renderFeedback(){
+  const el=document.getElementById('feedback-list');
+  if(!el)return;
+  el.innerHTML=feedbacks.map(f=>`
+    <div class="feedback-card">
+      <div class="feedback-header">
+        <div class="feedback-user">
+          <div class="feedback-avatar">${f.emoji}</div>
+          <div><div class="feedback-name">${f.name}</div><div class="feedback-date">${f.order} · ${f.date}, 2024</div></div>
+        </div>
+        <div class="stars">${'⭐'.repeat(f.stars)}${'☆'.repeat(5-f.stars)}</div>
+      </div>
+      <div class="feedback-msg">${f.msg}</div>
+    </div>`).join('');
+}
+
+// ── INIT ──
+renderRevenueChart();
+setTimeout(renderAnnualChart, 100);
+renderOrders();
+renderProducts();
+renderValidation();
+renderPayments();
+renderInstallments();
+renderEmployees();
+renderIntents();
+renderFeedback();
+</script>
+</body>
+</html>
